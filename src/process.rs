@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs;
 
+use crate::opts::OutputFormat;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Player {
     #[serde(rename = "Name")]
@@ -18,7 +20,7 @@ pub struct Player {
     pub kit: u8,
 }
 
-pub fn process_csv(input: &str, output: &str) -> Result<()> {
+pub fn process_csv(input: &str, output: String, format: OutputFormat) -> Result<()> {
     let mut reader = Reader::from_path(input)?;
     let mut ret = Vec::new();
     let headers = reader.headers()?.clone();
@@ -27,8 +29,13 @@ pub fn process_csv(input: &str, output: &str) -> Result<()> {
         let json_value = headers.iter().zip(record.iter()).collect::<Value>();
         ret.push(json_value);
     }
-    let json = serde_json::to_string_pretty(&ret)?;
-    fs::write(output, json)?;
+
+    let content = match format {
+        OutputFormat::Json => serde_json::to_string_pretty(&ret)?,
+        OutputFormat::Yaml => serde_yaml::to_string(&ret)?,
+    };
+
+    fs::write(output, content)?;
 
     Ok(())
 }
