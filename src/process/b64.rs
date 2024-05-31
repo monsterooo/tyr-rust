@@ -7,7 +7,7 @@ use base64::{
 
 use crate::{get_reader, Base64Format};
 
-pub fn process_encode(input: &str, format: Base64Format) -> anyhow::Result<()> {
+pub fn process_encode(input: &str, format: Base64Format) -> anyhow::Result<String> {
     let mut reader = get_reader(input)?;
     let mut buf = Vec::new();
 
@@ -17,12 +17,11 @@ pub fn process_encode(input: &str, format: Base64Format) -> anyhow::Result<()> {
         Base64Format::Standard => URL_SAFE.encode(&buf),
         Base64Format::UrlSafe => URL_SAFE.encode(&buf),
     };
-    println!("{}", encode);
 
-    Ok(())
+    Ok(encode)
 }
 
-pub fn process_decode(input: &str, format: Base64Format) -> anyhow::Result<()> {
+pub fn process_decode(input: &str, format: Base64Format) -> anyhow::Result<Vec<u8>> {
     let mut reader = get_reader(input)?;
     let mut buf = String::new();
 
@@ -34,9 +33,6 @@ pub fn process_decode(input: &str, format: Base64Format) -> anyhow::Result<()> {
         Base64Format::Standard => STANDARD.decode(&buf)?,
         Base64Format::UrlSafe => URL_SAFE_NO_PAD.decode(&buf)?,
     };
-    let decode = String::from_utf8(decode)?;
 
-    println!("{}", decode);
-
-    Ok(())
+    Ok(decode)
 }
